@@ -35,6 +35,7 @@ func main() {
 		answerURL    = flag.String("answer-url", "", "Base URL for the local answer model (default: http://localhost:11434/v1)")
 		lang       = flag.String("lang", "en", "Language hint for Whisper (e.g. en, es, fr)")
 		profile    = flag.String("profile", "", "Path to interviewee resume/profile (.txt, .pdf, .docx)")
+		company    = flag.String("company", "", "Path to company/role context file (.txt, .pdf, .docx)")
 		useOnline  = flag.Bool("online", false, "Use OpenAI Whisper API for transcription (requires --api-key)")
 		useLocal   = flag.Bool("local", false, "Use local offline transcription via whisper-cpp (default)")
 		modelPath  = flag.String("model-path", defaultModelPath, "Path to whisper.cpp model file (auto-downloaded if absent)")
@@ -110,7 +111,19 @@ func main() {
 		fmt.Printf("Profile loaded: %s (%d chars)\n", profileName, len(profileText))
 	}
 
-	answerer, answerModelName := buildAnswerer(*localAnswers && !*onlineAnswers, *model, *answerURL, *apiKey, profileText)
+	var companyText, companyName string
+	if *company != "" {
+		text, err := resume.Load(*company)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Failed to load company file:", err)
+			os.Exit(1)
+		}
+		companyText = text
+		companyName = filepath.Base(*company)
+		fmt.Printf("Company context loaded: %s (%d chars)\n", companyName, len(companyText))
+	}
+
+	answerer, answerModelName := buildAnswerer(*localAnswers && !*onlineAnswers, *model, *answerURL, *apiKey, profileText, companyText)
 
 	cfg := ui.Config{
 		APIKey:              *apiKey,
@@ -122,6 +135,8 @@ func main() {
 		Language:            *lang,
 		ProfileText:         profileText,
 		ProfileName:         profileName,
+		CompanyText:         companyText,
+		CompanyName:         companyName,
 		Transcriber:         transcriber,
 		Answerer:            answerer,
 		AnswerModelName:     answerModelName,
@@ -165,7 +180,7 @@ func buildTranscriber(useOnline, useLocal bool, apiKey, modelPath, lang, whisper
 
 // buildAnswerer constructs the answer backend.
 // When localAnswers is true, it uses a local Ollama model; otherwise OpenAI.
-func buildAnswerer(localAnswers bool, model, answerURL, apiKey, profileText string) (assistant.Answerer, string) {
+func buildAnswerer(localAnswers bool, model, answerURL, apiKey, profileText, companyText string) (assistant.Answerer, string) {
 	if localAnswers {
 		if err := assistant.EnsureOllamaModel(model); err != nil {
 			fmt.Fprintln(os.Stderr, "Error:", err)
@@ -173,7 +188,7 @@ func buildAnswerer(localAnswers bool, model, answerURL, apiKey, profileText stri
 		}
 		label := model + "@local"
 		fmt.Printf("Answer backend: local (%s)\n", label)
-		return assistant.NewLocal(model, profileText, answerURL), label
+		return assistant.NewLocal(model, profileText, companyText, answerURL), label
 	}
 
 	if apiKey == "" {
@@ -186,7 +201,7 @@ func buildAnswerer(localAnswers bool, model, answerURL, apiKey, profileText stri
 		model = "gpt-4o"
 	}
 	fmt.Printf("Answer backend: OpenAI (%s)\n", model)
-	return assistant.New(apiKey, model, profileText), model
+	return assistant.New(apiKey, model, profileText, companyText), model
 }
 
 // expandPath replaces a leading ~ with the user's home directory.

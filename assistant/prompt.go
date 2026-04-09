@@ -19,3 +19,13 @@ Shape every answer to be consistent with the profile above:
 - Reference the candidate's actual experience, skills, and achievements where relevant.
 - Do not claim skills or experiences not mentioned in the profile.
 - Tailor technical answers to the technologies and domains the candidate knows.`
+
+const companyPromptSuffix = `
+
+COMPANY / ROLE CONTEXT:
+%s
+
+Use the above to further tailor answers:
+- Align responses with the company's values, tech stack, and culture where relevant.
+- Reference the role's responsibilities or requirements when they strengthen an answer.
+- Do not fabricate specifics not present in the context.`

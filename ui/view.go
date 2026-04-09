@@ -28,6 +28,9 @@ func (m *Model) View() string {
 	if m.cfg.ProfileName != "" {
 		profileLabel = "  |  profile: " + m.cfg.ProfileName
 	}
+	if m.cfg.CompanyName != "" {
+		profileLabel += "  |  company: " + m.cfg.CompanyName
+	}
 	header := headerStyle.Width(w).Render(
 		fmt.Sprintf(" Interview Assistant   [%s mode%s]", modeLabel, profileLabel),
 	)

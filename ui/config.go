@@ -16,6 +16,8 @@ type Config struct {
 	Language            string
 	ProfileText         string // plain-text content of the interviewee's resume/profile
 	ProfileName         string // filename shown in the header
+	CompanyText         string // plain-text content of the company/role context
+	CompanyName         string // filename shown in the header
 	Transcriber         transcription.Transcriber
 	Answerer            assistant.Answerer
 	AnswerModelName     string // display only (e.g. "gpt-4o" or "llama3@local")

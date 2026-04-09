@@ -30,18 +30,26 @@ type Assistant struct {
 	maxTurns     int
 }
 
-// New creates an Assistant. profileText may be empty for generic answers.
-func New(apiKey, model, profileText string) *Assistant {
-	prompt := basePrompt
-	if strings.TrimSpace(profileText) != "" {
-		prompt += fmt.Sprintf(profilePromptSuffix, strings.TrimSpace(profileText))
-	}
+// New creates an Assistant. profileText and companyText may each be empty.
+func New(apiKey, model, profileText, companyText string) *Assistant {
+	prompt := buildSystemPrompt(profileText, companyText)
 	return &Assistant{
 		client:       openai.NewClient(apiKey),
 		model:        model,
 		systemPrompt: prompt,
 		maxTurns:     20,
 	}
+}
+
+func buildSystemPrompt(profileText, companyText string) string {
+	prompt := basePrompt
+	if strings.TrimSpace(profileText) != "" {
+		prompt += fmt.Sprintf(profilePromptSuffix, strings.TrimSpace(profileText))
+	}
+	if strings.TrimSpace(companyText) != "" {
+		prompt += fmt.Sprintf(companyPromptSuffix, strings.TrimSpace(companyText))
+	}
+	return prompt
 }
 
 // Answer generates a suggested answer for the given question text.

@@ -42,6 +42,9 @@ The binary is written to `bin/interview-assistant`.
 # Load your resume for profile-aware answers
 ./bin/interview-assistant --mode dual --profile ~/resume.pdf
 
+# Load resume + company/job description for fully contextual answers
+./bin/interview-assistant --mode dual --profile ~/resume.pdf --company ~/stripe_jd.pdf
+
 # Use OpenAI for answers instead of local Ollama
 ./bin/interview-assistant --online-answers --api-key $OPENAI_API_KEY
 
@@ -54,7 +57,8 @@ The binary is written to `bin/interview-assistant`.
 | Flag | Default | Description |
 |---|---|---|
 | `--mode` | `single` | `single` (mic only) or `dual` (mic + system audio) |
-| `--profile` | — | Path to resume/profile file (`.txt`, `.pdf`, `.docx`) |
+| `--profile` | — | Path to your resume/profile (`.txt`, `.pdf`, `.docx`) |
+| `--company` | — | Path to company or job description file (`.txt`, `.pdf`, `.docx`) |
 | `--model` | `llama3:latest` / `gpt-4o` | Answer model name |
 | `--local-answers` | `true` | Use local Ollama model for answers |
 | `--online-answers` | `false` | Use OpenAI for answers |

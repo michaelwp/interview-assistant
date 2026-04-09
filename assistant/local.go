@@ -89,7 +89,7 @@ func ollamaResponding() bool {
 
 // NewLocal creates a LocalAssistant. baseURL defaults to the standard Ollama
 // endpoint; model defaults to "llama3".
-func NewLocal(model, profileText, baseURL string) *LocalAssistant {
+func NewLocal(model, profileText, companyText, baseURL string) *LocalAssistant {
 	if baseURL == "" {
 		baseURL = defaultOllamaURL
 	}
@@ -103,10 +103,7 @@ func NewLocal(model, profileText, baseURL string) *LocalAssistant {
 	cfg := openai.DefaultConfig("ollama") // Ollama ignores the API key
 	cfg.BaseURL = baseURL
 
-	prompt := basePrompt
-	if strings.TrimSpace(profileText) != "" {
-		prompt += fmt.Sprintf(profilePromptSuffix, strings.TrimSpace(profileText))
-	}
+	prompt := buildSystemPrompt(profileText, companyText)
 	return &LocalAssistant{
 		client:       openai.NewClientWithConfig(cfg),
 		model:        model,
